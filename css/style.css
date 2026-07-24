@@ -489,7 +489,8 @@ p { margin: 0; }
 .about-hero p { margin-top: 18px; font-size: 15.5px; line-height: 1.6; color: var(--color-body); }
 .about-hero h2 { margin-top: 12px; font-size: clamp(23px, 5.4vw, 34px); line-height: 1.16; }
 .thirty-years { display: flex; justify-content: center; }
-.thirty-years .wrap { position: relative; height: 180px; width: 100%; max-width: 220px; }
+.thirty-years .wrap { position: relative; height: 260px; width: 100%; max-width: 320px; }
+@media (min-width: 1024px) { .thirty-years .wrap { height: 320px; max-width: 380px; } }
 .thirty-years img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
 
 .mission-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
