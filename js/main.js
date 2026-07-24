@@ -16,42 +16,73 @@
 
   /* ---------- Reveal on scroll ---------- */
   function initReveal() {
-    var els = document.querySelectorAll(".reveal");
+    var els = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
     if (!els.length) return;
     if (!("IntersectionObserver" in window)) {
       els.forEach(function (el) { el.classList.add("in-view"); });
       return;
     }
-    var groups = {};
+
+    // Elements sharing a [data-reveal-parent] ancestor fade in together,
+    // staggered, the first time any one of them enters the viewport.
+    var groupEls = {};
+    var solo = [];
     els.forEach(function (el) {
-      var groupId = el.getAttribute("data-reveal-group") || "solo-" + Math.random();
-      (groups[groupId] = groups[groupId] || []).push(el);
+      var group = el.closest("[data-reveal-parent]");
+      if (group) {
+        if (!groupEls[groupHash(group)]) groupEls[groupHash(group)] = { group: group, items: [] };
+        groupEls[groupHash(group)].items.push(el);
+      } else {
+        solo.push(el);
+      }
     });
+
+    var revealed = new WeakSet();
+    function revealItems(items) {
+      items.forEach(function (item, i) {
+        if (revealed.has(item)) return;
+        revealed.add(item);
+        setTimeout(function () {
+          item.classList.add("in-view");
+        }, i * 90);
+      });
+    }
+
     var io = new IntersectionObserver(
       function (entries, obs) {
         entries.forEach(function (entry) {
           if (!entry.isIntersecting) return;
-          var group = entry.target.closest("[data-reveal-parent]");
-          var items = group
-            ? group.querySelectorAll(".reveal")
-            : [entry.target];
-          items.forEach(function (item, i) {
-            setTimeout(function () {
-              item.classList.add("in-view");
-            }, i * 90);
-          });
+          revealItems([entry.target]);
           obs.unobserve(entry.target);
         });
       },
       { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
     );
-    document.querySelectorAll("[data-reveal-parent]").forEach(function (group) {
-      var first = group.querySelector(".reveal");
-      if (first) io.observe(first);
+
+    Object.keys(groupEls).forEach(function (key) {
+      var entry = groupEls[key];
+      var groupObserver = new IntersectionObserver(
+        function (entries, obs) {
+          entries.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            revealItems(entry.items);
+            obs.disconnect();
+          });
+        },
+        { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
+      );
+      groupObserver.observe(entry.group);
     });
-    document.querySelectorAll(".reveal:not([data-reveal-parent] .reveal)").forEach(function (el) {
-      if (!el.closest("[data-reveal-parent]")) io.observe(el);
-    });
+
+    solo.forEach(function (el) { io.observe(el); });
+  }
+
+  var groupHashCounter = 0;
+  var groupHashMap = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+  function groupHash(el) {
+    if (!groupHashMap) return el;
+    if (!groupHashMap.has(el)) groupHashMap.set(el, ++groupHashCounter);
+    return groupHashMap.get(el);
   }
 
   /* ---------- Animated counters ---------- */
@@ -222,12 +253,20 @@
     });
   }
 
+  function safe(fn, name) {
+    try {
+      fn();
+    } catch (err) {
+      if (window.console && console.error) console.error("main.js: " + name + " failed", err);
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
-    initMobileMenu();
-    initReveal();
-    initCounters();
-    initHeroCarousel();
-    initSwitchers();
-    initSizePickers();
+    safe(initMobileMenu, "initMobileMenu");
+    safe(initReveal, "initReveal");
+    safe(initCounters, "initCounters");
+    safe(initHeroCarousel, "initHeroCarousel");
+    safe(initSwitchers, "initSwitchers");
+    safe(initSizePickers, "initSizePickers");
   });
 })();
