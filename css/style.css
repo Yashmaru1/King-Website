@@ -1,4 +1,4 @@
-/* King Plastic Industries — static site stylesheet */
+/* King Plastic Industries - static site stylesheet */
 
 :root {
   --color-cream: #fbf8f1;
@@ -510,6 +510,7 @@ p { margin: 0; }
 
 .cert-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 @media (min-width: 1024px) { .cert-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
+@media (min-width: 1024px) { .cert-grid-3 { grid-template-columns: repeat(3, 1fr); } }
 .cert-card { border-radius: 16px; border: 1px solid var(--color-border); background: #fff; padding: 24px; }
 .cert-card .name { font-family: var(--font-serif); font-size: 20px; font-weight: 600; color: var(--color-forest-mid); }
 .cert-card p { margin-top: 10px; font-size: 14px; line-height: 1.6; color: var(--color-body); }

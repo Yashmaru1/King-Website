@@ -1,4 +1,4 @@
-// King Plastic Industries — static site behaviour
+// King Plastic Industries - static site behaviour
 (function () {
   "use strict";
 
